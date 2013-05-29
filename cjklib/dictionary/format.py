@@ -145,6 +145,8 @@ class NonReadingEntityWhitespace(Base):
 
     def format(self, columns):
         headword, headwordSimplified, reading, translation = columns
+        if not reading:
+            reading = ""
 
         readingEntities = []
         precedingIsNonReading = False
