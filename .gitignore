@@ -1,6 +1,10 @@
+build/
+dist/
 *~
 *.pyc
 test/downloads
 *.egg-info
 env
 .noseids
+Unihan.zip
+
