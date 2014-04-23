@@ -818,7 +818,7 @@ class WadeGilesDialectConverter(EntityWiseReadingConverter):
         try:
             return self._getToOperator(toReading).getTonalEntity(plainSyllable,
                 tone)
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -878,7 +878,7 @@ class PinyinWadeGilesConverter(RomanisationConverter):
         try:
             return self._f.getTonalEntity(transSyllable, tone, toReading,
                 **self.DEFAULT_READING_OPTIONS[toReading])
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1029,7 +1029,7 @@ class GRDialectConverter(ReadingConverter):
                 plainRealEntity, realTone = grOperator.splitEntityTone(
                     realEntity)
                 baseTone = grOperator.getBaseTone(realTone)
-            except UnsupportedError, e:
+            except UnsupportedError as e:
                 raise ConversionError(
                     "Unabled to get ethymological tone if  '%s': %s"
                     % (realEntity, e))
@@ -1282,7 +1282,7 @@ class GRPinyinConverter(RomanisationConverter):
                     # lookup Erlhuah form for GR
                     return self._grOperator.getRhotacisedTonalEntity(
                         transSyllable, transTone)
-                except UnsupportedError, e:
+                except UnsupportedError as e:
                     # handle this as a conversion error as the there is no
                     #   Erlhuah form given for the given tone
                     raise ConversionError(e)
@@ -1292,7 +1292,7 @@ class GRPinyinConverter(RomanisationConverter):
 
                 return self._f.getTonalEntity(transSyllable, transTone,
                     toReading, **self.DEFAULT_READING_OPTIONS[toReading])
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1597,7 +1597,7 @@ class PinyinBrailleConverter(DialectSupportReadingConverter):
                 self._reversePunctuationMapping[value] = key
 
         # regex to split out punctuation
-        self._pinyinPunctuationRegex = re.compile(ur'(' \
+        self._pinyinPunctuationRegex = re.compile(r'(' \
             + '|'.join([re.escape(p) for p \
                 in self.PUNCTUATION_SIGNS_MAPPING.keys()]) \
             + '|.+?)')
@@ -1605,7 +1605,7 @@ class PinyinBrailleConverter(DialectSupportReadingConverter):
         braillePunctuation = list(set(self.PUNCTUATION_SIGNS_MAPPING.values()))
         # longer marks first in regex
         braillePunctuation.sort(lambda x, y: len(y) - len(x))
-        self._braillePunctuationRegex = re.compile(ur'(' \
+        self._braillePunctuationRegex = re.compile(r'(' \
             + '|'.join([re.escape(p) for p in braillePunctuation]) + '|.+?)')
 
     def _createMappings(self):
@@ -1796,7 +1796,7 @@ class PinyinBrailleConverter(DialectSupportReadingConverter):
         try:
             return self._getToOperator(toReading).getTonalEntity(transSyllable,
                 tone)
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1822,7 +1822,7 @@ class JyutpingDialectConverter(EntityWiseReadingConverter):
         try:
             return self._getToOperator(toReading).getTonalEntity(plainSyllable,
                 tone)
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1854,7 +1854,7 @@ class CantoneseYaleDialectConverter(EntityWiseReadingConverter):
                 # don't change uppercase
                 transEntity = titlecase(transEntity)
             return transEntity
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1953,7 +1953,7 @@ class JyutpingYaleConverter(RomanisationConverter):
         try:
             return self._f.getTonalEntity(transSyllable, transTone, toReading,
                 **self.DEFAULT_READING_OPTIONS[toReading])
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)
@@ -1975,7 +1975,7 @@ class ShanghaineseIPADialectConverter(EntityWiseReadingConverter):
         try:
             return self._getToOperator(toReading).getTonalEntity(plainSyllable,
                 tone)
-        except InvalidEntityError, e:
+        except InvalidEntityError as e:
             # handle this as a conversion error as the converted syllable is not
             #   accepted by the operator
             raise ConversionError(*e.args)

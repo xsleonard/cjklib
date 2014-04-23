@@ -66,7 +66,7 @@ def getDBConnector(configuration=None, projectName='cjklib'):
     """
     global _dbconnectInst, _dbconnectInstSettings
     # allow single string and interpret as url
-    if isinstance(configuration, basestring):
+    if isinstance(configuration, str):
         configuration = {'sqlalchemy.url': configuration}
 
     elif not configuration:
@@ -169,7 +169,7 @@ class DatabaseConnector(object):
         """
         if not configuration:
             configuration = {}
-        elif isinstance(configuration, basestring):
+        elif isinstance(configuration, str):
             # backwards compatibility to option databaseUrl
             configuration = {'sqlalchemy.url': configuration}
         else:
@@ -188,7 +188,7 @@ class DatabaseConnector(object):
         self.databaseUrl = configuration['sqlalchemy.url']
         """Database url"""
         registerUnicode = configuration.pop('registerUnicode', False)
-        if isinstance(registerUnicode, basestring):
+        if isinstance(registerUnicode, str):
             registerUnicode = (registerUnicode.lower()
                 in ['1', 'yes', 'true', 'on'])
         self.registerUnicode = registerUnicode
