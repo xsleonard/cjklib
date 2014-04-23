@@ -1,5 +1,5 @@
-Installing and Using Cjklib
-===========================
+Han character library for CJKV languages
+========================================
 
 Introduction
 ------------
@@ -12,8 +12,7 @@ information.
 
 Dependencies
 ------------
-- [Python][python] ≥ 2.4
-  - A port to Python3 is under development in the [python3 branch](https://github.com/khaeru/cjklib/tree/python3).
+- [Python][python] 3.4
 - [SQLite][sqlite] ≥ 3
 - [SQLAlchemy][sqlalchemy] ≥ 0.5
 - [pysqlite2][pysqlite2] (ships with Python 2.5 and above)
