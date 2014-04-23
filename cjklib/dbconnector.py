@@ -25,7 +25,6 @@ import os
 import logging
 import glob
 import operator
-from itertools import imap
 
 from sqlalchemy import MetaData, Table, engine_from_config
 from sqlalchemy.sql import text
@@ -522,7 +521,7 @@ class DatabaseConnector(object):
         :return: an iterator of scalars
         """
         result = self.execute(request)
-        return imap(self._decode, imap(operator.itemgetter(0), result))
+        return map(self._decode, map(operator.itemgetter(0), result))
 
     def selectRow(self, request):
         """
@@ -557,4 +556,4 @@ class DatabaseConnector(object):
         :return: an iterator of tuples
         """
         result = self.execute(request)
-        return imap(self._decode, result)
+        return map(self._decode, result)

@@ -688,7 +688,7 @@ class PinyinDialectConverter(ReadingConverter):
                     toReadingEntities.append(
                         self._getToOperator(toReading).getTonalEntity(
                             plainSyllable, tone))
-                except InvalidEntityError, e:
+                except InvalidEntityError as e:
                     # handle this as a conversion error as the converted
                     #   syllable is not accepted by the operator
                     raise ConversionError(*e.args)

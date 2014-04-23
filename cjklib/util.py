@@ -27,7 +27,10 @@ import re
 import copy
 import os.path
 import platform
-import ConfigParser
+try:
+    import configparser
+except ImportError
+    import ConfigParser as configparser
 from optparse import Option, OptionValueError
 import csv
 
@@ -70,10 +73,10 @@ def getConfigSettings(section, projectName='cjklib'):
     :return: configuration settings for the given project
     """
     # don't convert to lowercase
-    h = ConfigParser.SafeConfigParser.optionxform
+    h = configparser.SafeConfigParser.optionxform
     try:
-        ConfigParser.SafeConfigParser.optionxform = lambda self, x: x
-        config = ConfigParser.SafeConfigParser()
+        configparser.SafeConfigParser.optionxform = lambda self, x: x
+        config = configparser.SafeConfigParser()
         homeDir = os.path.expanduser('~')
 
         configFiles = []
@@ -112,10 +115,10 @@ def getConfigSettings(section, projectName='cjklib'):
         config.read(configFiles)
 
         configuration = dict(config.items(section))
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
         configuration = {}
 
-    ConfigParser.SafeConfigParser.optionxform = h
+    configparser.SafeConfigParser.optionxform = h
 
     return configuration
 
@@ -200,7 +203,7 @@ def getDataPath():
 # define our own titlecase methods, as the Python implementation is currently
 #   buggy (http://bugs.python.org/issue6412), see also
 #   http://www.unicode.org/mail-arch/unicode-ml/y2009-m07/0066.html
-_FIRST_NON_CASE_IGNORABLE = re.compile(ur"(?u)([.˳｡￮₀ₒ]?\W*)(\w)(.*)$")
+_FIRST_NON_CASE_IGNORABLE = re.compile(r"(?u)([.˳｡￮₀ₒ]?\W*)(\w)(.*)$")
 """
 Regular expression matching the first alphabetic character. Include GR neutral
 tone forms.

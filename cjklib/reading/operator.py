@@ -783,11 +783,11 @@ class TonalIPAOperator(TonalFixedEntityOperator):
           they have a distinct set of characters that belong to the reading.
     """
     TONE_MARK_REGEX = {'numbers': re.compile(r'(?<!\d)(\d)$'),
-        'superscriptNumbers': re.compile(ur'(?<![⁰¹²³⁴⁵⁶⁷⁸⁹])([⁰¹²³⁴⁵⁶⁷⁸⁹])$'),
+        'superscriptNumbers': re.compile(r'(?<![⁰¹²³⁴⁵⁶⁷⁸⁹])([⁰¹²³⁴⁵⁶⁷⁸⁹])$'),
         'chaoDigits': re.compile(r'([12345]+)$'),
-        'superscriptChaoDigits': re.compile(ur'([¹²³⁴⁵]+)$'),
-        'ipaToneBar': re.compile(ur'([˥˦˧˨˩꜈꜉꜊꜋꜌]+)$'),
-        'diacritics': re.compile(ur'([\u0300\u0301\u0302\u0303\u030c]+)')
+        'superscriptChaoDigits': re.compile(r'([¹²³⁴⁵]+)$'),
+        'ipaToneBar': re.compile(r'([˥˦˧˨˩꜈꜉꜊꜋꜌]+)$'),
+        'diacritics': re.compile(r'([\u0300\u0301\u0302\u0303\u030c]+)')
         }
 
     DEFAULT_TONE_MARK_TYPE = 'ipaToneBar'
@@ -1121,7 +1121,7 @@ class KanaOperator(SimpleEntityOperator):
 
 
 class PinyinOperator(TonalRomanisationOperator):
-    ur"""
+    r"""
     Provides an operator for the Mandarin romanisation Hanyu Pinyin.
     It can be configured to cope with different representations (*"dialects"*)
     of Pinyin. For conversion between different representations the
@@ -1398,7 +1398,7 @@ class PinyinOperator(TonalRomanisationOperator):
         if toneMarkType == 'diacritics':
             readingStrNFD = unicodedata.normalize("NFD", readingStr)
             # remove non-tonal diacritics
-            readingStrNFDClear = re.compile(ur'([ezcs]\u0302|u\u0308)',
+            readingStrNFDClear = re.compile(r'([ezcs]\u0302|u\u0308)',
                 re.IGNORECASE | re.UNICODE).sub('', readingStrNFD)
 
             for tone in cls.DIACRITICS_LIST:
@@ -2029,10 +2029,8 @@ class WadeGilesOperator(TonalRomanisationOperator):
     TO_SUPERSCRIPT = {1: u'¹', 2: u'²', 3: u'³', 4: u'⁴', 5: u'⁵', 0: u'⁰'}
     """Mapping of tone numbers to superscript numbers."""
     FROM_SUPERSCRIPT = dict([(value, key) \
-        for key, value in TO_SUPERSCRIPT.iteritems()])
+        for key, value in TO_SUPERSCRIPT.items()])
     """Mapping of superscript numbers to tone numbers."""
-    del value
-    del key
 
     APOSTROPHE_LIST = ["'", u'’', u'´', u'‘', u'`', u'ʼ', u'ˈ', u'′', u'ʻ']
     """List of apostrophes used in guessing routine."""
@@ -2067,7 +2065,7 @@ class WadeGilesOperator(TonalRomanisationOperator):
     Other regular vowels are not allowed for substitution as of ambiguity.
     """
 
-    syllableRegex = re.compile(ur'(' \
+    syllableRegex = re.compile(r'(' \
         + u'(?:(?:ch|hs|sh|ts|tz|ss|sz|[pmftnlkhjyw])' \
         + u'(?:' + '|'.join([re.escape(a) for a in APOSTROPHE_LIST]) + ')?)?'
         + u'(?:' + '|'.join([re.escape(a) for a \
@@ -2084,7 +2082,6 @@ class WadeGilesOperator(TonalRomanisationOperator):
     - final consonants n/ng and rh (for êrh), h (for -ih, -üeh),
     - tone numbers.
     """
-    del a
 
     def __init__(self, **options):
         u"""
@@ -2235,7 +2232,7 @@ class WadeGilesOperator(TonalRomanisationOperator):
 
             # ü
             if not umlautU:
-                matchObj = re.compile(ur'(?:ch|hs|[nly])' \
+                matchObj = re.compile(r'(?:ch|hs|[nly])' \
                     + u'(?:' + '|'.join([re.escape(a) for a \
                         in cls.APOSTROPHE_LIST]) + ')?'
                     + u'(' + '|'.join([re.escape(a) for a \
@@ -2701,7 +2698,7 @@ class WadeGilesOperator(TonalRomanisationOperator):
         try:
             standardPlainSyllable = self.convertPlainEntity(
                 plainSyllable.lower())
-        except AmbiguousConversionError, e:
+        except AmbiguousConversionError as e:
             raise UnsupportedError(*e.args)
 
         table = self.db.tables['WadeGilesInitialFinal']
@@ -3666,10 +3663,10 @@ class MandarinBrailleOperator(ReadingOperator):
             select([self.db.tables['PinyinBrailleFinalMapping'].c.Braille],
                 distinct=True)))
         # initial and final optional (but at least one), tone optional
-        self._splitRegex = re.compile(ur'((?:(?:[' + re.escape(initials) \
+        self._splitRegex = re.compile(r'((?:(?:[' + re.escape(initials) \
             + '][' + re.escape(finals) + ']?)|['+ re.escape(finals) \
             + u'])[' + re.escape(''.join(self.TONEMARKS)) + ']?)')
-        self._brailleRegex = re.compile(ur'([⠀-⣿]+|[^⠀-⣿]+)')
+        self._brailleRegex = re.compile(r'([⠀-⣿]+|[^⠀-⣿]+)')
 
     @classmethod
     def getDefaultOptions(cls):
@@ -4102,7 +4099,7 @@ class CantoneseYaleOperator(TonalRomanisationOperator):
     information and thus can be used as a standard target reading.
     """
 
-    syllableRegex = re.compile(ur'((?:m|ng|h|' \
+    syllableRegex = re.compile(r'((?:m|ng|h|' \
         + u'(?:[bcdfghjklmnpqrstvwxyz]*' \
         + u'(?:(?:[aeiou]|[\u0304\u0301\u0300])+|yu[\u0304\u0301\u0300]?)))' \
         + u'(?:h(?!(?:[aeiou]|yu)))?' \
