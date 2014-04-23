@@ -1,11 +1,8 @@
-===========================
 Installing and Using Cjklib
 ===========================
 
-.. contents::
-
 Introduction
-============
+------------
 Cjklib provides language routines related to Han characters (characters based
 on Chinese characters named Hanzi, Kanji, Hanja and chu Han respectively) used
 in writing of the Chinese, the Japanese, infrequently the Korean and formerly
@@ -14,29 +11,30 @@ pronunciations, radicals, glyph components, stroke decomposition and variant
 information.
 
 Dependencies
-============
-- Python_ 2.4 or above (currently no support for Python3)
-- SQLite_ 3+
-- SQLAlchemy_ 0.5+
-- pysqlite2_ (already ships with Python 2.5 and above)
+------------
+- [Python][python] ≥ 2.4
+  - A port to Python3 is under development in the [python3 branch](https://github.com/khaeru/cjklib/tree/python3).
+- [SQLite][sqlite] ≥ 3
+- [SQLAlchemy][sqlalchemy] ≥ 0.5
+- [pysqlite2][pysqlite2] (ships with Python 2.5 and above)
 
 Alternatively for MySQL as backend:
 
-- MySQL_ 5+
-- MySQL-Python_
+- [MySQL][mysql] ≥ 5
+- [MySQL-Python][mysql-python]
 
-.. _Python: http://www.python.org/download/
-.. _SQLite: http://www.sqlite.org/download.html
-.. _MySQL: http://www.mysql.com/downloads/mysql/
-.. _SQLAlchemy: http://www.sqlalchemy.org/download.html
-.. _pysqlite2: http://code.google.com/p/pysqlite/downloads/list
-.. _MySQL-Python: http://sourceforge.net/projects/mysql-python/
+[python]: http://www.python.org/download/
+[sqlite]: http://www.sqlite.org/download.html
+[mysql]: http://www.mysql.com/downloads/mysql/
+[sqlalchemy]: http://www.sqlalchemy.org/download.html
+[pysqlite2]: http://code.google.com/p/pysqlite/downloads/list
+[mysql-python]: http://sourceforge.net/projects/mysql-python/
 
 Installing
-==========
+----------
 
-Windows
--------
+### Windows
+
 Install cjklib using the provided ``.exe`` installer. Make sure above
 dependencies are satisfied.
 
@@ -57,8 +55,8 @@ the directory given by the ``APPDATA`` environment variable, e.g.
 ``CEDICT`` for any other supported dictionary (i.e. EDICT, CEDICT, HanDeDict,
 CFDICT, CEDICTGR).
 
-Unix
-----
+### Unix
+
 If you are installing from the source package you need to deploy the library on
 your system::
 
@@ -76,48 +74,52 @@ dictionary (i.e. EDICT, CEDICT, HanDeDict, CFDICT, CEDICTGR).
 
 
 Documentation & Usage
-=====================
-Documentation_ is available online. Also see the `project page`_ and its wiki.
+---------------------
+Documentation is available online at http://cjklib.readthedocs.org/. Also see the [project page][project-page] and its wiki.
 There is a small command line tool ``cjknife`` that offers some of the library's
 functions. See ``cjknife --help`` for an overview.
 
-.. _Documentation: http://cjklib.org/
-.. _project page: http://code.google.com/p/cjklib/
+[project-page]: http://code.google.com/p/cjklib/
 
-Examples
---------
+### Examples
 
 - Get stroke order of characters::
 
-    >>> from cjklib import characterlookup
-    >>> cjk = characterlookup.CharacterLookup('C')
-    >>> cjk.getStrokeOrder(u'说')
-    [u'㇔', u'㇊', u'㇔', u'㇒', u'㇑', u'㇕', u'㇐', u'㇓', u'㇟']
+  ````python
+  >>> from cjklib import characterlookup
+  >>> cjk = characterlookup.CharacterLookup('C')
+  >>> cjk.getStrokeOrder(u'说')
+  [u'㇔', u'㇊', u'㇔', u'㇒', u'㇑', u'㇕', u'㇐', u'㇓', u'㇟']
+  ````
 
 - Access a dictionary (here using Jim Breen's EDICT)::
 
-    >>> from cjklib.dictionary import EDICT
-    >>> d = EDICT()
-    >>> d.getForTranslation('Tokyo')
-    [EntryTuple(Headword=u'東京', Reading=u'とうきょう',
-    Translation=u'/(n) Tokyo (current capital of Japan)/(P)/')]
-
+  ````python
+  >>> from cjklib.dictionary import EDICT
+  >>> d = EDICT()
+  >>> d.getForTranslation('Tokyo')
+  [EntryTuple(Headword=u'東京', Reading=u'とうきょう', Translation=u'/(n) Tokyo (current capital of Japan)/(P)/')]
+  ````
 
 Database
-========
+--------
 Packaged versions of the library will ship with a pre-built SQLite database
 file. You can however easily rebuild the database yourself.
 
 First download the newest Unihan file::
 
-    $ wget ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
+````
+$ wget ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
+````
 
 Then start the build process::
 
-    $ sudo buildcjkdb -r build cjklibData
+````
+$ sudo buildcjkdb -r build cjklibData
+````
 
-SQLite
-------
+### SQLite
+
 SQLite by default has no Unicode support for string operations. Optionally the
 ICU library can be compiled in for handling alphabetic non-ASCII characters.
 Cjklib can register own Unicode functions if ICU support is missing. Queries
@@ -125,19 +127,23 @@ with ``LIKE`` will then use function ``lower()``. This compatibility mode has
 negative impact on performance and as it is not needed for dictionaries like
 EDICT or CEDICT it is disabled by default. See ``cjklib.conf`` for enabling.
 
-MySQL
------
+### MySQL
+
 With MySQL 5 the following ``CREATE`` command creates a database with ``utf8``
 as character set using the general Unicode collation
 (MySQL from 5.5.3 on will support full Unicode given character set
 ``utf8mb4`` and collation ``utf8mb4_bin``)::
 
-    CREATE DATABASE cjklib DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+```
+CREATE DATABASE cjklib DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+````
 
 You might need to set access rights, too (substitute ``user_name`` and
 ``host_name``)::
 
-    GRANT ALL ON cjklib.* TO 'user_name'@'host_name';
+````
+GRANT ALL ON cjklib.* TO 'user_name'@'host_name';
+````
 
 Now update the settings in  ``cjklib.conf``.
 
@@ -150,9 +156,7 @@ Alternatively pass ``--wideBuild=False`` to ``buildcjkdb``.
 
 
 Contact
-=======
-For help or discussions on cjklib, join `cjklib-devel@googlegroups.com
-<http://groups.google.com/group/cjklib-devel>`_.
+-------
+For help or discussions on cjklib, join [cjklib-devel@googlegroups.com](http://groups.google.com/group/cjklib-devel).
 
-Please report bugs to the `project's bug tracker
-<http://code.google.com/p/cjklib/issues/list>`_.
+Please report bugs to the [project's bug tracker](http://code.google.com/p/cjklib/issues/list).
