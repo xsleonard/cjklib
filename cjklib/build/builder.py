@@ -68,6 +68,7 @@ __all__ = [
     "SimpleWenlinFormatBuilder"
     ]
 
+import io
 import types
 import re
 import os.path
@@ -459,7 +460,6 @@ class UnihanGenerator:
         handles = {}
         import zipfile
         if len(self.fileNames) == 1 and zipfile.is_zipfile(self.fileNames[0]):
-            import io
             z = zipfile.ZipFile(self.fileNames[0], "r")
             for member in z.namelist():
                 handles[member] \
@@ -725,7 +725,6 @@ class Kanjidic2Builder(EntryGeneratorBuilder):
             """
             import gzip
             if self.dataPath.endswith('.gz'):
-                import io
                 z = gzip.GzipFile(self.dataPath, 'r')
                 handle = io.StringIO(z.read())
             else:
@@ -3021,28 +3020,24 @@ class EDICTFormatBuilder(EntryGeneratorBuilder):
 
         def generator(self):
             """Provides the dictionary entries."""
-            try:
-                for line in self.fileHandle:
-                    # ignore comments
-                    if line.lstrip().startswith('#'):
-                        continue
-                    # parse line
-                    matchObj = self.entryRegex.match(line)
-                    if not matchObj:
-                        if not self.quiet and line.strip() != '':
-                            warn("error reading line '" + line + "'")
-                        continue
-                    # get entries
-                    entry = matchObj.groups()
-                    if self.columns:
-                        entry = dict([(self.columns[idx], cell) for idx, cell \
-                            in enumerate(entry)])
-                    if self.filterFunc:
-                        entry = self.filterFunc(entry)
-                    yield entry
-            except UnicodeDecodeError:
-                print(self.fileHandle)
-                raise
+            for line in self.fileHandle:
+                # ignore comments
+                if line.lstrip().startswith('#'):
+                    continue
+                # parse line
+                matchObj = self.entryRegex.match(line)
+                if not matchObj:
+                    if not self.quiet and line.strip() != '':
+                        warn("error reading line '" + line + "'")
+                    continue
+                # get entries
+                entry = matchObj.groups()
+                if self.columns:
+                    entry = dict([(self.columns[idx], cell) for idx, cell \
+                        in enumerate(entry)])
+                if self.filterFunc:
+                    entry = self.filterFunc(entry)
+                yield entry
 
     COLUMNS = ['Headword', 'Reading', 'Translation']
     PRIMARY_KEYS = []
@@ -3200,14 +3195,12 @@ class EDICTFormatBuilder(EntryGeneratorBuilder):
 
         if self.fileType == '.zip' \
             or not self.fileType and zipfile.is_zipfile(filePath):
-            import io
             z = zipfile.ZipFile(filePath, 'r')
             archiveContent = self.getArchiveContentName(z.namelist(), filePath)
             return io.StringIO(z.read(archiveContent)\
                 .decode(self.ENCODING))
         elif self.fileType in ('.tar', '.tar.bz2', '.tar.gz') \
             or not self.fileType and tarfile.is_tarfile(filePath):
-            import io
             mode = ''
             ending = self.fileType or filePath
             if ending.endswith('bz2'):
@@ -3218,15 +3211,17 @@ class EDICTFormatBuilder(EntryGeneratorBuilder):
             archiveContent = self.getArchiveContentName(z.getnames(), filePath)
             fileObj = z.extractfile(archiveContent)
             return io.StringIO(fileObj.read().decode(self.ENCODING))
-        elif self.fileType == '.gz' \
-            or not self.fileType and filePath.endswith('.gz'):
+
+        try:
             import gzip
-            import io
-            z = gzip.GzipFile(filePath, 'r')
+            z = gzip.open(filePath, 'r')
             return io.StringIO(z.read().decode(self.ENCODING))
-        else:
-            import codecs
-            return codecs.open(filePath, 'r', self.ENCODING)
+        except OSError as e:
+            if e.args[0] != 'Not a gzipped file':
+                raise
+
+        import codecs
+        return codecs.open(filePath, 'r', self.ENCODING)
 
     def buildFTS3CreateTableStatement(self, table):
         """
@@ -3970,7 +3965,6 @@ class SimpleWenlinFormatBuilder(EntryGeneratorBuilder):
 
         if (self.fileType == '.zip'
             or not self.fileType and zipfile.is_zipfile(filePath)):
-            import io
             z = zipfile.ZipFile(filePath, 'r')
             archiveContent = self.getArchiveContentName(z.namelist(), filePath)
             return io.StringIO(z.read(archiveContent)\
@@ -3978,7 +3972,6 @@ class SimpleWenlinFormatBuilder(EntryGeneratorBuilder):
         elif (self.fileType == '.gz'
             or not self.fileType and filePath.endswith('.gz')):
             import gzip
-            import io
             z = gzip.GzipFile(filePath, 'r')
             return io.StringIO(z.read().decode(self.ENCODING))
         else:
