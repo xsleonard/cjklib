@@ -29,7 +29,7 @@ import os.path
 import platform
 try:
     import configparser
-except ImportError
+except ImportError:
     import ConfigParser as configparser
 from optparse import Option, OptionValueError
 import csv
