@@ -299,7 +299,7 @@ class DatabaseConnector(object):
         """
         # get views that are currently not (well) supported by SQLalchemy
         #   http://www.sqlalchemy.org/trac/ticket/812
-        schemas = [self._mainSchema] + self.attached.values()
+        schemas = [self._mainSchema] + list(self.attached.values())
 
         if self.engine.name == 'mysql':
             views = []

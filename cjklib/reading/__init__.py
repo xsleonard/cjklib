@@ -21,8 +21,6 @@ Character reading based functions (transliterations, romanizations, ...).
 
 __all__ = ['operator', 'converter', 'ReadingFactory']
 
-import types
-
 from cjklib.exception import UnsupportedError
 from cjklib import dbconnector
 from cjklib.reading import operator as readingoperator
@@ -72,7 +70,7 @@ class ReadingFactory(object):
         # get all non-abstract classes that inherit from ReadingOperator
         readingOperatorClasses = [clss for clss \
             in readingoperator.__dict__.values() \
-            if type(clss) == types.TypeType \
+            if type(clss) == type \
                 and issubclass(clss, readingoperator.ReadingOperator) \
                 and clss.READING_NAME]
 
@@ -92,7 +90,7 @@ class ReadingFactory(object):
         # get all non-abstract classes that inherit from ReadingConverter
         readingConverterClasses = [clss \
             for clss in readingconverter.__dict__.values() \
-            if type(clss) == types.TypeType \
+            if type(clss) == type \
             and issubclass(clss, readingconverter.ReadingConverter) \
             and clss.CONVERSION_DIRECTIONS]
 
