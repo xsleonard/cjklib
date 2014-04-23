@@ -68,7 +68,7 @@ __all__ = [
     "SimpleWenlinFormatBuilder"
     ]
 
-import io
+from io import StringIO
 import types
 import re
 import os.path
@@ -463,7 +463,7 @@ class UnihanGenerator:
             z = zipfile.ZipFile(self.fileNames[0], "r")
             for member in z.namelist():
                 handles[member] \
-                    = io.StringIO(z.read(member).decode('utf-8'))
+                    = StringIO(z.read(member).decode('utf-8'))
         else:
             import codecs
             for member in self.fileNames:
@@ -726,7 +726,7 @@ class Kanjidic2Builder(EntryGeneratorBuilder):
             import gzip
             if self.dataPath.endswith('.gz'):
                 z = gzip.GzipFile(self.dataPath, 'r')
-                handle = io.StringIO(z.read())
+                handle = StringIO(z.read())
             else:
                 import codecs
                 handle = codecs.open(self.dataPath, 'r')
@@ -3197,7 +3197,7 @@ class EDICTFormatBuilder(EntryGeneratorBuilder):
             or not self.fileType and zipfile.is_zipfile(filePath):
             z = zipfile.ZipFile(filePath, 'r')
             archiveContent = self.getArchiveContentName(z.namelist(), filePath)
-            return io.StringIO(z.read(archiveContent)\
+            return StringIO(z.read(archiveContent)\
                 .decode(self.ENCODING))
         elif self.fileType in ('.tar', '.tar.bz2', '.tar.gz') \
             or not self.fileType and tarfile.is_tarfile(filePath):
@@ -3210,12 +3210,12 @@ class EDICTFormatBuilder(EntryGeneratorBuilder):
             z = tarfile.open(filePath, 'r' + mode)
             archiveContent = self.getArchiveContentName(z.getnames(), filePath)
             fileObj = z.extractfile(archiveContent)
-            return io.StringIO(fileObj.read().decode(self.ENCODING))
+            return StringIO(fileObj.read().decode(self.ENCODING))
 
         try:
             import gzip
             z = gzip.open(filePath, 'r')
-            return io.StringIO(z.read().decode(self.ENCODING))
+            return StringIO(z.read().decode(self.ENCODING))
         except OSError as e:
             if e.args[0] != 'Not a gzipped file':
                 raise
@@ -3967,13 +3967,13 @@ class SimpleWenlinFormatBuilder(EntryGeneratorBuilder):
             or not self.fileType and zipfile.is_zipfile(filePath)):
             z = zipfile.ZipFile(filePath, 'r')
             archiveContent = self.getArchiveContentName(z.namelist(), filePath)
-            return io.StringIO(z.read(archiveContent)\
+            return StringIO(z.read(archiveContent)\
                 .decode(self.ENCODING))
         elif (self.fileType == '.gz'
             or not self.fileType and filePath.endswith('.gz')):
             import gzip
             z = gzip.GzipFile(filePath, 'r')
-            return io.StringIO(z.read().decode(self.ENCODING))
+            return StringIO(z.read().decode(self.ENCODING))
         else:
             import codecs
             return codecs.open(filePath, 'r', self.ENCODING)
