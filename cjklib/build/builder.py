@@ -69,14 +69,14 @@ __all__ = [
     ]
 
 import csv
-from io import StringIO
+from io import StringIO, TextIOWrapper
 import types
 import re
 import os.path
 import copy
 import xml.sax
 import itertools
-from logging import info, warning as warn
+from logging import debug, info, warning as warn
 
 from sqlalchemy import Table, Column, Integer, String, DateTime, Text, Index
 from sqlalchemy import select, union
@@ -228,12 +228,10 @@ class TableBuilder(object):
 
         table = Table(tableName, self.db.metadata)
         for column in columns:
-            if column in columnTypeMap:
-                colType = columnTypeMap[column]
-            else:
-                colType = Text()
-                info("column {} has no type, assuming default 'Text()'".format(
-                                                                       column))
+            if column not in columnTypeMap:
+                debug(("column {} has no type, assuming default 'Text()'"
+                       ).format(column))
+            colType = columnTypeMap.get(column, Text())
             table.append_column(Column(column, colType,
                 primary_key=(column in primaryKeys), autoincrement=False))
 
@@ -312,20 +310,11 @@ class EntryGeneratorBuilder(TableBuilder):
         table.create()
 
         # write table content
-        #try:
-            #entries = self.getEntryDict(self.getGenerator())
-            #self.db.execute(table.insert(), entries)
-        #except IntegrityError, e:
-            #warn(unicode(e))
-            ##warn(unicode(insertStatement))
-            #raise
-
-        for newEntry in generator:
-            try:
-                table.insert(newEntry).execute()
-            except IntegrityError as e:
-                info(str(e))
-                raise
+        try:
+            entries = self.getEntryDict(generator)
+            self.db.execute(table.insert(), entries)
+        except IntegrityError as e:
+            raise
 
         for index in self.buildIndexObjects(self.PROVIDES, self.INDEX_KEYS):
             index.create()
@@ -459,9 +448,7 @@ class UnihanGenerator:
         import zipfile
         if len(self.fileNames) == 1 and zipfile.is_zipfile(self.fileNames[0]):
             z = zipfile.ZipFile(self.fileNames[0], "r")
-            for member in z.namelist():
-                handles[member] \
-                    = StringIO(z.read(member).decode('utf-8'))
+            handles = {n: TextIOWrapper(z.open(n)) for n in z.namelist()}
         else:
             import codecs
             for member in self.fileNames:
@@ -479,22 +466,15 @@ class UnihanGenerator:
         :return: list of column names
         """
         if not self.keySet:
-            if not self.quiet:
-                warn("Looking for all keys in Unihan database...")
             self.keySet = set()
-            handleDict = self.getHandles()
-            for handle in list(handleDict.values()):
+            for handle in self.getHandles().values():
                 for line in handle:
-                    # ignore comments
-                    if line.startswith('#'):
-                        continue
-                    resultObj = self.ENTRY_REGEX.match(line)
-                    if not resultObj:
-                        continue
-
-                    _, key, _ = resultObj.group(1, 2, 3)
-                    self.keySet.add(key)
+                    if not line.startswith('#'):
+                        break
+                    else:
+                        self.keySet.add(line.rstrip().partition('#\t')[2])
                 handle.close()
+            self.keySet.remove('')
         return list(self.keySet)
 
 
