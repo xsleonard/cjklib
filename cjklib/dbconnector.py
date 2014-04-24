@@ -474,18 +474,7 @@ class DatabaseConnector(object):
         encoded in utf8. We need to fix that here.
         :param data: a tuple or scalar value
         """
-        if hasattr(data, '__iter__'):
-            newData = []
-            for cell in data:
-                if type(cell) == type(''):
-                    pass  # was: cell = cell.decode('utf8')
-                newData.append(cell)
-            return tuple(newData)
-        else:
-            if type(data) == type(''):
-                return data.decode('utf8')
-            else:
-                return data
+        return data
 
     def selectScalar(self, request):
         """
