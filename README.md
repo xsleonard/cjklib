@@ -10,6 +10,9 @@ the Vietnamese language(s). Functionality is included for character
 pronunciations, radicals, glyph components, stroke decomposition and variant
 information.
 
+[This repository](https://github.com/khaeru/cjklib) contains work to port Cjklib
+to Python 3.4.
+
 Dependencies
 ------------
 - [Python][python] 3.4
