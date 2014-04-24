@@ -412,10 +412,11 @@ class CharacterRangeIterator(object):
 
 class default_dialect(csv.Dialect):
     """Dialect for reading CSV files in data/."""
-    quoting = csv.QUOTE_NONE
+    delimiter = ','
+    escapechar = '\\'
     lineterminator = '\n'
     quotechar = "'"
-    escapechar = '\\'
+    quoting = csv.QUOTE_NONE
 
 
 class ExtendedOption(Option):
