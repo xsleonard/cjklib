@@ -76,7 +76,7 @@ import os.path
 import copy
 import xml.sax
 import itertools
-import logging
+from logging import info, warning as warn
 
 from sqlalchemy import Table, Column, Integer, String, DateTime, Text, Index
 from sqlalchemy import select, union
@@ -232,9 +232,8 @@ class TableBuilder(object):
                 colType = columnTypeMap[column]
             else:
                 colType = Text()
-                if not self.quiet:
-                    warn("column %s has no type, assuming default 'Text()'"
-                        % column)
+                info("column {} has no type, assuming default 'Text()'".format(
+                                                                       column))
             table.append_column(Column(column, colType,
                 primary_key=(column in primaryKeys), autoincrement=False))
 
@@ -325,8 +324,7 @@ class EntryGeneratorBuilder(TableBuilder):
             try:
                 table.insert(newEntry).execute()
             except IntegrityError as e:
-                if not(self.quiet):
-                    warn(str(e))
+                info(str(e))
                 raise
 
         for index in self.buildIndexObjects(self.PROVIDES, self.INDEX_KEYS):
@@ -922,9 +920,8 @@ class UnihanDerivedBuilder(EntryGeneratorBuilder):
         return self.GENERATOR_CLASS(tableEntries, self.quiet).generator()
 
     def build(self):
-        if not self.quiet:
-            warn("Reading table content from Unihan column '%s'"
-                % self.COLUMN_SOURCE)
+        info("Reading table content from Unihan column '{}'".format(
+                                                           self.COLUMN_SOURCE))
         super(UnihanDerivedBuilder, self).build()
 
 
@@ -984,9 +981,9 @@ class CharacterRadicalBuilder(UnihanDerivedBuilder):
                 if matchObj:
                     radical = matchObj.group(1)
                     yield(character, radical)
-                elif not self.quiet:
-                    warn("unable to read radical information of character '" \
-                        + character + "': '" + radicalStroke + "'")
+                else:
+                    warn(("unable to read radical information of character '{}"
+                          "': '{}'").format(character, radicalStroke))
 
     COLUMN_TARGETS = ['RadicalIndex']
     COLUMN_TARGETS_TYPES = {'RadicalIndex': Integer()}
@@ -1099,11 +1096,11 @@ class CharacterVariantBuilder(EntryGeneratorBuilder):
                                 if self.wideBuild or codePoint < 0x10000:
                                     variant = fromCodepoint(codePoint)
                                     yield(character, variant, variantType)
-                        elif not self.quiet:
+                        else:
                             # didn't match the regex
-                            warn('unable to read variant information of ' \
-                                + "character '" + character + "' for type '" \
-                                + variantType + "': '" + variantInfo + "'")
+                            warn(("unable to read variant information of "
+                                  "character '{}' for type '{}': '{}'").format(
+                                  character, variantType, variantInfo))
 
     PROVIDES = 'CharacterVariant'
     DEPENDS = ['Unihan']
@@ -1167,9 +1164,8 @@ class CharacterVariantBuilder(EntryGeneratorBuilder):
                 .generator()
 
     def build(self):
-        if not self.quiet:
-            warn("Reading table content from Unihan columns '%s'"
-                % "', '".join(list(self.COLUMN_SOURCE_ABBREV.keys())))
+        info("Reading table content from Unihan columns '{}'".format(
+             "', '".join(list(self.COLUMN_SOURCE_ABBREV.keys()))))
         super(CharacterVariantBuilder, self).build()
 
 
@@ -1194,9 +1190,8 @@ class UnihanCharacterSetBuilder(EntryGeneratorBuilder):
         return iter(tableEntries)
 
     def build(self):
-        if not self.quiet:
-            warn("Reading table content from Unihan column '%s'"
-                % self.COLUMN_SOURCE)
+        info("Reading table content from Unihan column '{}'".format(
+                                                           self.COLUMN_SOURCE))
         super(UnihanCharacterSetBuilder, self).build()
 
 
@@ -1253,9 +1248,8 @@ class BIG5HKSCSSetBuilder(EntryGeneratorBuilder):
         return itertools.chain(big5, hkscs)
 
     def build(self):
-        if not self.quiet:
-            warn("Reading table content from Unihan columns "
-                "'kBigFive' and 'kHKSCS'")
+        info("Reading table content from Unihan columns 'kBigFive' and "
+             "'kHKSCS'")
         super(BIG5HKSCSSetBuilder, self).build()
 
 
@@ -1295,9 +1289,8 @@ class JISX0208_0213SetBuilder(EntryGeneratorBuilder):
         return itertools.chain(jis0208, jis0213)
 
     def build(self):
-        if not self.quiet:
-            warn("Reading table content from Unihan columns "
-                "'kJis0' and 'kJIS0213'")
+        info("Reading table content from Unihan columns 'kJis0' and "
+             "'kJIS0213'")
         super(JISX0208_0213SetBuilder, self).build()
 
 
@@ -1650,8 +1643,7 @@ class CSVFileLoader(TableBuilder):
         contentFile = self.findFile([self.TABLE_CSV_FILE_MAPPING], "table")
 
         # get create statement
-        if not self.quiet:
-            warn("Reading table definition from file '" + definitionFile + "'")
+        info("Reading table definition from file '{}'".format(definitionFile))
 
         fileHandle = codecs.open(definitionFile, 'r', 'utf-8')
         createStatement = ''.join(fileHandle.readlines()).strip("\n")

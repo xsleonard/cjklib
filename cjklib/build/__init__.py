@@ -23,6 +23,7 @@ __all__ = ["DatabaseBuilder"]
 
 import types
 import locale
+import logging
 import sys
 import os.path
 
@@ -31,6 +32,10 @@ from sqlalchemy.exc import OperationalError
 from cjklib import dbconnector
 from cjklib import exception
 from cjklib.util import locateProjectFile
+
+
+logging.basicConfig(format='%(message)s', level=logging.INFO)
+warn = logging.info
 
 class DatabaseBuilder:
     """
@@ -803,15 +808,3 @@ class DatabaseBuilder:
             self.db.execute('VACUUM')
         else:
             raise Exception('Database does not seem to support optimization')
-
-#{ Global methods
-
-def warn(message):
-    """
-    Prints the given message to stderr with the system's default encoding.
-
-    :type message: str
-    :param message: message to print
-    """
-    print(message.encode(locale.getpreferredencoding(),
-        'replace'), file=sys.stderr)
