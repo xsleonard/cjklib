@@ -478,7 +478,7 @@ class DatabaseConnector(object):
             newData = []
             for cell in data:
                 if type(cell) == type(''):
-                    cell = cell.decode('utf8')
+                    pass  # was: cell = cell.decode('utf8')
                 newData.append(cell)
             return tuple(newData)
         else:
