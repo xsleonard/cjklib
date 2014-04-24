@@ -24,8 +24,8 @@ Unit tests for :mod:`cjklib.dictionary`.
 
 import re
 import os
-import new
 import unittest
+import types
 
 from cjklib.dictionary import (getAvailableDictionaries, getDictionaryClass,
     getDictionary)
@@ -105,7 +105,7 @@ class DictionaryResultTest(DictionaryTest):
         dictionaryBuilder = [cls for cls in builderClasses
             if cls.PROVIDES == self.table][0]
 
-        contentBuilder = new.classobj("SimpleDictBuilder",
+        contentBuilder = types.ClassType("SimpleDictBuilder",
             (DictionaryResultTest._ContentGenerator, dictionaryBuilder),
             {'content': self.INSTALL_CONTENT})
 
