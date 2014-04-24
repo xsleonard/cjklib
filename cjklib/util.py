@@ -29,7 +29,7 @@ import os.path
 import platform
 try:
     import configparser
-except ImportError:
+except ImportError:  # 2.x
     import ConfigParser as configparser
 from optparse import Option, OptionValueError
 import csv
@@ -209,7 +209,7 @@ Regular expression matching the first alphabetic character. Include GR neutral
 tone forms.
 """
 def titlecase(strng):
-    u"""
+    """
     Returns the string (without "word borders") in titlecase.
 
     This function is not designed to work for multi-entity strings in general
@@ -263,9 +263,9 @@ if sys.maxunicode < 0x10000:
         """
         if codepoint >= 0x10000:
             hi, lo = divmod(codepoint - 0x10000, 0x400)
-            return unichr(0xd800 + hi) + unichr(0xdc00 + lo)
+            return chr(0xd800 + hi) + chr(0xdc00 + lo)
         else:
-            return unichr(codepoint)
+            return chr(codepoint)
 
     def toCodepoint(char):
         """
@@ -290,8 +290,8 @@ if sys.maxunicode < 0x10000:
 
         Always returns ``False`` for wide builds.
         """
-        return (len(string) == 2 and u'\ud800' < string[0] < u'\udbff'
-            and u'\udc00' < string[1] < u'\udfff')
+        return (len(string) == 2 and '\ud800' < string[0] < '\udbff'
+            and '\udc00' < string[1] < '\udfff')
 
     def getCharacterList(string):
         """
@@ -322,7 +322,7 @@ else:
 
             `PEP 261 <http://www.python.org/dev/peps/pep-0261/>`_
         """
-        return unichr(codepoint)
+        return chr(codepoint)
 
     def toCodepoint(char):
         """
@@ -397,7 +397,7 @@ class CharacterRangeIterator(object):
             return []
     def __iter__(self):
         return self
-    def next(self):
+    def __next__(self):
         if not self._curRange:
             raise StopIteration
 
@@ -410,94 +410,12 @@ class CharacterRangeIterator(object):
 
 #{ Library extensions
 
-class UnicodeCSVFileIterator(object):
-    """Provides a CSV file iterator supporting Unicode."""
-    class DefaultDialect(csv.Dialect):
-        """Defines a default dialect for the case sniffing fails."""
-        quoting = csv.QUOTE_NONE
-        delimiter = ','
-        lineterminator = '\n'
-        quotechar = "'"
-        # the following are needed for Python 2.4
-        escapechar = "\\"
-        doublequote = True
-        skipinitialspace = False
-
-    def __init__(self, fileHandle):
-        self.fileHandle = fileHandle
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        if not hasattr(self, '_csvReader'):
-            self._csvReader = self._getCSVReader(self.fileHandle)
-
-        return [unicode(cell, 'utf-8') for cell in self._csvReader.next()]
-
-    @staticmethod
-    def utf_8_encoder(unicode_csv_data):
-        for line in unicode_csv_data:
-            yield line.encode('utf-8')
-
-    @staticmethod
-    def byte_string_dialect(dialect):
-        class ByteStringDialect(csv.Dialect):
-            def __init__(self, dialect):
-                for attr in ["delimiter", "quotechar", "escapechar",
-                    "lineterminator"]:
-                    old = getattr(dialect, attr)
-                    if old is not None:
-                        setattr(self, attr, str(old))
-
-                for attr in ["doublequote", "skipinitialspace", "quoting"]:
-                    setattr(self, attr, getattr(dialect, attr))
-
-                csv.Dialect.__init__(self)
-
-        return ByteStringDialect(dialect)
-
-    def _getCSVReader(self, fileHandle):
-        """
-        Returns a csv reader object for a given file name.
-
-        The file can start with the character '#' to mark comments. These will
-        be ignored. The first line after the leading comments will be used to
-        guess the csv file's format.
-
-        :type fileHandle: file
-        :param fileHandle: file handle of the CSV file
-        :rtype: instance
-        :return: CSV reader object returning one entry per line
-        """
-        def prependLineGenerator(line, data):
-            """
-            The first line red for guessing format has to be reinserted.
-            """
-            yield line
-            for nextLine in data:
-                yield nextLine
-
-        line = '#'
-        try:
-            while line.strip().startswith('#'):
-                line = fileHandle.next()
-        except StopIteration:
-            return csv.reader(fileHandle)
-        try:
-            self.fileDialect = csv.Sniffer().sniff(line, ['\t', ','])
-            # fix for Python 2.4
-            if len(self.fileDialect.delimiter) == 0:
-                raise csv.Error()
-        except csv.Error:
-            self.fileDialect = UnicodeCSVFileIterator.DefaultDialect()
-
-        content = prependLineGenerator(line, fileHandle)
-        return csv.reader(
-            UnicodeCSVFileIterator.utf_8_encoder(content),
-            dialect=UnicodeCSVFileIterator.byte_string_dialect(
-                self.fileDialect))
-        #return csv.reader(content, dialect=self.fileDialect) # TODO
+class default_dialect(csv.Dialect):
+    """Dialect for reading CSV files in data/."""
+    quoting = csv.QUOTE_NONE
+    lineterminator = '\n'
+    quotechar = "'"
+    escapechar = '\\'
 
 
 class ExtendedOption(Option):
@@ -869,9 +787,9 @@ else:
             if not self:
                 raise KeyError('dictionary is empty')
             if last:
-                key = reversed(self).next()
+                key = next(reversed(self))
             else:
-                key = iter(self).next()
+                key = next(iter(self))
             value = self.pop(key)
             return key, value
 

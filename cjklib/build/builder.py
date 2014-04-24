@@ -68,6 +68,7 @@ __all__ = [
     "SimpleWenlinFormatBuilder"
     ]
 
+import csv
 from io import StringIO
 import types
 import re
@@ -85,8 +86,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 from cjklib import characterlookup
 from cjklib import exception
-from cjklib.build import warn
-from cjklib.util import (UnicodeCSVFileIterator, CollationString, CollationText,
+from cjklib.util import (default_dialect, CollationString, CollationText,
     deprecated, fromCodepoint, getCharacterList)
 
 # pylint: disable-msg=E1101
@@ -1669,15 +1669,16 @@ class CSVFileLoader(TableBuilder):
 
         if not self.entrywise:
             entries = []
-            for line in UnicodeCSVFileIterator(fileHandle):
-                if len(line) == 1 and not line[0].strip():
+            for line in csv.reader(fileHandle, dialect=default_dialect):
+                if line[0].startswith('#') or (len(line) == 1 and not
+                                               line[0].strip()):
                     continue
                 try:
                     entryDict = dict([(column.name, line[i]) \
                         for i, column in enumerate(table.columns)])
                 except IndexError:
-                    raise ValueError("Invalid entry, line length mismatch: %s"
-                        % repr(line))
+                    raise ValueError('Invalid entry, line length mismatch: {}'.format(
+                        line) + str(contentFile))
 
                 if doFilter:
                     entryDict = self.filterEntry(entryDict)
@@ -1693,7 +1694,7 @@ class CSVFileLoader(TableBuilder):
                         ' to find violating entry')
                 raise
         else:
-            for line in UnicodeCSVFileIterator(fileHandle):
+            for line in csv.reader(fileHandle, dialect=default_dialect):
                 if len(line) == 1 and not line[0].strip():
                     continue
                 entryDict = dict([(column.name, line[i]) \
